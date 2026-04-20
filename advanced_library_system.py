@@ -26,14 +26,15 @@ class Book:
             return f"\n{self.title} is currently not available"
     
 
-    def mark_returned(self,is_returned): # a method for users to return borrowed books
-        self.is_returned = is_returned
-
-        if self.available == False:
-            self.available = True
-            return f"{self.title} has been successfully returned"
-        else:
-            return "\nBook was not returned"
+    def mark_returned(self): # a method for users to return borrowed book
+            
+            if self.available == False:
+                print(f"Yes {self.title} was borrowed.")
+                self.available = True
+                return f"{self.title} has been successfully returned"
+          
+            else:
+                 return "Book was not returned"
         
 class LibraryUser(ABC): #abstract class for the library user
     '''Initializes a set of variables'''
@@ -87,6 +88,7 @@ class StudentUser(LibraryUser):
             else:
                 self._borrowed_books.append(student_input)
                 print(f"{student_input} has been successfully borrowed.")
+
         return self._borrowed_books
         
 
