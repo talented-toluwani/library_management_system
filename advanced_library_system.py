@@ -10,24 +10,30 @@ class Book:
         self._isbn = isbn
         self.available = available
     
+
     def __str__(self): #displays a human readble format
-        return f"Title:{self.title}, Author: {self.author}, ISBN: {self._isbn}, Available: {self.available}"
+        return f"\nTitle:{self.title}, Author: {self.author}, ISBN: {self._isbn}, Available: {self.available}"
      
+
     def mark_borrowed(self, borrower): # a method for users to borrow book
         self.borrower = borrower
+        
         if self.available == True:
             self.available = False
-            return f"You have successfully borrowed {self.title}"
+            return f"\nYou have successfully borrowed {self.title}"
+        
         else:
-            return f"{self.title} is currently not available"
+            return f"\n{self.title} is currently not available"
     
+
     def mark_returned(self,is_returned): # a method for users to return borrowed books
         self.is_returned = is_returned
+
         if self.available == False:
             self.available = True
             return f"{self.title} has been successfully returned"
         else:
-            return "Book was not returned"
+            return "\nBook was not returned"
         
 class LibraryUser(ABC): #abstract class for the library user
     '''Initializes a set of variables'''
@@ -36,13 +42,16 @@ class LibraryUser(ABC): #abstract class for the library user
         self.user_id = user_id
         self._borrowed_books = borrowed_books
 
+  
     @abstractmethod
     def borrow_book(self): #base method for borrow book
         pass
 
+
     @abstractmethod
     def return_book(self): #base method for return book
         pass
+
 
     @abstractmethod
     def view_access(self):
@@ -53,37 +62,43 @@ class StudentUser(LibraryUser):
 
     def __init__(self,name, user_id, borrowed_books):
         super().__init__(name, user_id, borrowed_books) #initializes the inherited class method
+ 
         self.max_borrow = 3 #student user borrowing limit
 
     def __str__(self):
         return f"Name: {self.name}, UserId: {self.user_id}, Borrowed books: {self._borrowed_books}"
-        
-    def borrow_book(self, user_borrow_book):
-        self.user_borrow_book = user_borrow_book
+
+
+    def borrow_book(self):
+
         list_of_available_books = ["Beauty", "Power", "Number", "Friend"]
         student_input = input("Enter the name of the book you want to borrow: ")
-        student_input_book_number =  int(input("Enter the total number of books you want to borrow:  "))
 
-        if student_input in list_of_available_books: #checks if the book to be borrowed is available 
-            print("Book to be borrowed is available")
-
-        else:
-            print("Book to be borrowed is not available")
-
-        if student_input_book_number > self.max_borrow : #checks if user is not borrowing more than the maximum number of books
-            print(f"Borrowing limit reached. You cannot borrow more than {self.max_borrow}")
+        if student_input not in list_of_available_books: #checks if the book to be borrowed is available 
+            print("Book not in stock")
+            return []
         
         else:
-            print("You are eligible for borrowing!")
 
-    def return_book(self, book_to_be_returned): #method for users to return boom
-        self.book_to_be_returned = book_to_be_returned
+            if len(self._borrowed_books) >= self.max_borrow:
+               print("Limit reached for the number of books that can be borrowed.")
+               return []
+            
+            else:
+                self._borrowed_books.append(student_input)
+                print(f"{student_input} has been successfully borrowed.")
+        return self._borrowed_books
+        
+
+      
+    def return_book(self): #method for users to return boom
         book_to_be_returned = input("Enter the name of the book to be returned: ")
 
         if book_to_be_returned not in self._borrowed_books:#checks if book to be returned was borrowed from the library
             print("This book was not borrowed by you")
         else:
             print(f"The book was successfully returned")
+
 
     def view_access(self):
         print(f"As a student you can borrow {self.max_borrow} books")
@@ -92,9 +107,11 @@ class AdminUser(LibraryUser):
     def __init__(self, name, user_id, borrowed_books):
         super().__init__(name, user_id, borrowed_books)
         self. available_books = ["Beauty", "Power", "Number", "Friend"]
-
+ 
+ 
     def __str__(self):
         return f"Name: {self.name}, UserId: {self.user_id}, Borrowed books: {self._borrowed_books}"
+
 
     def borrow_book(self, admin_input):
         self.admin_input = admin_input
@@ -104,13 +121,15 @@ class AdminUser(LibraryUser):
         else:
             print("Book successfully borrowed")
 
-    def return_book(self, admin_book_to_be_returned):
-        self.admin_book_to_be_returned = admin_book_to_be_returned
-        admin_book_to_be_returned = input("What is the name of the book to be returned?: ").title()
+
+    def return_book(self):
+        admin_book_to_be_returned = input("What is the name of the book to be returned?: ").title().slice()
+
         if admin_book_to_be_returned not in self.available_books:
             print("Book was not borrowed form the library")
         else:
             print(f"{admin_book_to_be_returned} successfully returned!")
+
 
     def view_access(self):
         print("There is no limitation to the number of books that can be borrwed by an admin user ")
@@ -195,19 +214,20 @@ class Library():
             {"Name": "Betty", "Email": "betty@gmail.com"}
             ]
            
-        LibraryPersistence.save_data(self.borrowed_books, "borrowed.json") #stores borrowed books in a json file
         self.borrowed_books = [] #empty list to temporarily store borrowed books
+        LibraryPersistence.save_data(self.borrowed_books, "borrowed.json") #stores borrowed books in a json file
        
 
-    def add_books(self, new_book):
-        self.new_book = new_book
-        new_book = input("What is the name of the book you want to add?: ")
+    def add_books(self):
+        new_book = input("What is the name of the book you want to add?: ").slice()
+
         if new_book in self.books:
             print("Book already exists in the library.")
             return
         self.books.append(new_book)
         LibraryPersistence.save_data(self.books, self.books_file)
         print("New book has been successfully added.")
+
 
     def register_user(self): #a method to register  new users
         user_name = input("Enter in  valid name: ").title()
@@ -222,8 +242,7 @@ class Library():
         return "New user has been successfully registered"
 
 
-    def borrow_book(self, requested_book): #a method to borrow books
-        self.requested_book = requested_book
+    def borrow_book(self): #a method to borrow books
         requested_book = input("Which book do you want to borrow?: ").title()
 
         try:
@@ -238,6 +257,7 @@ class Library():
         except BookUnavailableError as e: #prints custom exception error
             return str(e)
 
+
     def return_book(self):
         book_to_return = input ("What book do you want to return?: ").title()
 
@@ -251,11 +271,11 @@ class Library():
         return "The book has been successfully returned"
 
 
-
+print(" === Welcome to the Vantag Library Management System ===")
 #creates classes objects
 my_book = Book("Fairy tale", "Mary Jen", 1235, "Yes")
-student_user_1 = StudentUser("Toluwani Edgal", "BU24SEN1005", "None")
-admin_user_1 = AdminUser("Miracle John", 2357, "None")
+student_user_1 = StudentUser("Toluwani Edgal", "BU24SEN1005", [])
+admin_user_1 = AdminUser("Miracle John", 2357, [])
 
 #displays the output of the object
 print(my_book)
@@ -265,11 +285,11 @@ print(admin_user_1)
 #displays the output in the various methods belonging to the different classes
 print(my_book.mark_borrowed("Jane"))
 print(my_book.mark_returned("Jane"))
-print(student_user_1.borrow_book("Beauty"))
-print(student_user_1.return_book("Jane"))
+print(student_user_1.borrow_book())
+print(student_user_1.return_book())
 print(student_user_1.view_access())
-print(admin_user_1.borrow_book("Power"))
-print(admin_user_1.return_book("Power"))
+print(admin_user_1.borrow_book())
+print(admin_user_1.return_book())
 print(admin_user_1.view_access())
 
 book_available = BookUnavailableError("Beauty")
