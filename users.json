@@ -1,0 +1,36 @@
+[
+    {
+        "Name": "Miracle",
+        "Email": "miracle@gmail.com"
+    },
+    {
+        "Name": "John",
+        "Email": "john@gmail.com"
+    },
+    {
+        "Name": "Seyi",
+        "Email": "seyi@gmail.com"
+    },
+    {
+        "Name": "Josphine",
+        "Email": "josphine@gmail.com"
+    },
+    {
+        "Name": "Betty",
+        "Email": "betty@gmail.com"
+    },
+    {
+        "Name": "Toluwani",
+        "Email": "edgalmiracle@gmail.com"
+    },
+    {
+        "Name": "Toluwani Edgal",
+        "Email": "miracbel@gmail.com",
+        "Role": "student"
+    },
+    {
+        "Name": "Mirabel",
+        "Email": "edagl@gmail.com",
+        "Role": "student"
+    }
+]

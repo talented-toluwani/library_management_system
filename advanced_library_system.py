@@ -27,12 +27,11 @@ class Book:
     def mark_returned(self): # a method for users to return borrowed book
             
             if self.available == False:
-                print(f"Yes {self.title} was borrowed.")
                 self.available = True
                 return f"{self.title} has been successfully returned"
           
             else:
-                 return "Book was not returned"
+                return "Book was not returned"
         
 class LibraryUser(ABC): #abstract class for the library user
     '''Initializes a set of variables'''
@@ -57,36 +56,15 @@ class StudentUser(LibraryUser):
         return f"Name: {self.name}, UserId: {self.user_id}, Borrowed books: {self._borrowed_books}"
 
 
-    def return_book(self): #method for users to return boom
-        book_to_be_returned = input("Enter the name of the book to be returned: ").strip()
-
-        if book_to_be_returned not in self._borrowed_books:#checks if book to be returned was borrowed from the library
-            print("This book was not borrowed by you")
-        else:
-            print(f"The book was successfully returned")
-
-
     def view_access(self):
         print(f"As a student you can borrow {self.max_borrow} books")
 
 class AdminUser(LibraryUser):
     def __init__(self, name, user_id, borrowed_books):
         super().__init__(name, user_id, borrowed_books)
-        self. available_books = ["Beauty", "Power", "Number", "Friend"]
- 
  
     def __str__(self):
         return f"Name: {self.name}, UserId: {self.user_id}, Borrowed books: {self._borrowed_books}"
-
-
-    def return_book(self):
-        admin_book_to_be_returned = input("What is the name of the book to be returned?: ").title().strip()
-
-        if admin_book_to_be_returned not in self.available_books:
-            print("Book was not borrowed form the library")
-        else:
-            print(f"{admin_book_to_be_returned} successfully returned!")
-
 
     def view_access(self):
         print("There is no limitation to the number of books that can be borrwed by an admin user ")
@@ -112,12 +90,12 @@ class LibraryPersistence():
     @staticmethod
     def load_data(filename):
         if not os.path.exists(filename):#checks if the file exists
-            print(f"{filename} does not exists. Starting with an empty data.")
+            print(f"{filename} does not exists. \nStarting with an empty data.")
             return []
         
         try: 
             with open(filename, "r") as file:
-                data = json.load(file)#convert from json to python dta format
+                data = json.load(file)#convert from json to python data format
                 print("Data successfully loaded")
                 return data
             
@@ -134,7 +112,7 @@ class LibrarySearch:
     def search(library,book_search = None):
 
         if book_search is None:
-            book_search = input("What is the name of the book you are looking for?: ").strip()
+            book_search = input("What is the name of the book you are looking for?: ")
 
         user_book = [] #temporarily stores books matched by users
 
@@ -163,21 +141,24 @@ class Library():
         
 
         self.users = LibraryPersistence.load_data(users_file) #saves users in a json files
+
         if not self.users: #checks if users to be registered is already registered
            self.users = [
-            {"Name": "Miracle", "Email": "miracle@gmail.com"},
-            {"Name": "John", "Email": "john@gmail.com"},
-            {"Name": "Seyi", "Email": "seyi@gmail.com"},
-            {"Name": "Josphine", "Email": "josphine@gmail.com"},
-            {"Name": "Betty", "Email": "betty@gmail.com"}
+            {"Name": "Miracle", "Email": "miracle@gmail.com", "Role": "admin"},
+            {"Name": "John", "Email": "john@gmail.com", "Role": "student"},
+            {"Name": "Seyi", "Email": "seyi@gmail.com", "Role": "admin"},
+            {"Name": "Josphine", "Email": "josphine@gmail.com", "Role": "student"},
+            {"Name": "Betty", "Email": "betty@gmail.com", "Role": "admin"}
             ]
-           
-        self.borrowed_books = [] #empty list to temporarily store borrowed books
-        LibraryPersistence.save_data(self.borrowed_books, "borrowed.json") #stores borrowed books in a json file
+ 
+        self.borrowed_books = LibraryPersistence.load_data("borrowed.json")
+
+        if not self.borrowed_books:
+            self.borrowed_books = [] 
        
 
     def add_books(self):
-        new_book = input("What is the name of the book you want to add?: ").strip()
+        new_book = input("\nWhat is the name of the book you want to add?: ").title().strip()
 
         if new_book in self.books:
             print("Book already exists in the library.")
@@ -188,14 +169,18 @@ class Library():
 
 
     def register_user(self): #a method to register  new users
-        user_name = input("Enter in  valid name: ").title().strip()
+        user_name = input("\nEnter in  valid name: ").title().strip()
         user_email = input ("Enter in a valid  email:").lower().strip()
+        user_role = input("Are you a student or an admin?: ").lower().strip()
+
+        if user_role not in ["student", "admin"]:
+            return "Invalid role"
         
         for user in self.users: #checks if it is alrready a registerd user
-           if user["Name"] == user_name and user["Email"] == user_email:
-             return "User has registered before"
+           if user["Email"] == user_email :
+                return "User has registered before"
 
-        self.users.append({"Name": user_name, "Email": user_email}) #saves user data
+        self.users.append({"Name": user_name, "Email": user_email, "Role": user_role}) #saves user data
         LibraryPersistence.save_data(self.users, self.users_file)
         return "New user has been successfully registered"
 
@@ -208,12 +193,13 @@ class Library():
                return []
              
             else:
-                user_requested_book = input("What book do you want to borrow?: ").title().strip()
-                self._process_borrow_book(user_requested_book, user)
+                print("'\nStudent can borrow a maximum of three books")
+                user_requested_book = input("\nWhat book do you want to borrow?: ").title()
+                return self._process_borrow_book(user_requested_book, user)
     
         else:
-            admin_requested_book = input("What book do you want to borrow: ").title().strip()      
-            self._process_borrow_book(admin_requested_book, user)
+            admin_requested_book = input("What book do you want to borrow: ").title()
+            return self._process_borrow_book(admin_requested_book, user)
 
     
     def _process_borrow_book(self, book_title, user): #helper function for borrow_book method
@@ -225,28 +211,32 @@ class Library():
             self.books.remove(book_title)
             self.borrowed_books.append(book_title)
             user._borrowed_books.append(book_title)
+            LibraryPersistence.save_data(self.books, self.books_file)
+            LibraryPersistence.save_data(self.borrowed_books, "borrowed.json")
             return "Book has been successfully borrowed."
         
         except BookUnavailableError as e:
            print(f"An error occured: {e}")
 
-
+        
     def return_book(self, user):   
                  
-        book_to_return = input ("What book do you want to return?: ").title().strip()
+        book_to_return = input ("\nWhat book do you want to return?: ").title().strip()
 
         if book_to_return not in user._borrowed_books: #checks if borrowed nook was borrowed from the library
             return f"This book was not borrowed"
         
-
-        self.borrowed_books.remove(book_to_return)
-        self.books.append(book_to_return)
-        user._borrowed_books(book_to_return)
-        LibraryPersistence.save_data(self.books, self.books_file) #saves data in json
-        LibraryPersistence.save_data(self.borrowed_books, "borrowed.json") #saves data in json
-        return "The book has been successfully returned"
-
-
+        if book_to_return not in self.borrowed_books:
+            return "Book not found in the library borrowed records"
+        
+        else:
+           self.borrowed_books.remove(book_to_return)
+           self.books.append(book_to_return)
+           user._borrowed_books.remove(book_to_return)
+           LibraryPersistence.save_data(self.books, self.books_file) #saves data in json
+           LibraryPersistence.save_data(self.borrowed_books, "borrowed.json") #saves data in json
+           return "The book has been successfully returned"
+    
 
 def run():
     print(" === Welcome to the Vantag Library Management System ===")
@@ -257,17 +247,20 @@ def run():
     student_user_1 = StudentUser("Toluwani Edgal", "BU24SEN1005", []) # defined here
     admin_user_1 = AdminUser("Miracle John", 2357, [])                # defined here
 
+   
 
-
-    print(my_book)                         
+    print(my_book)   
+    print(my_library.register_user())                            
     my_library.borrow_book(student_user_1)  # accessible here
     my_library.borrow_book(admin_user_1)    # accessible here
 
     student_user_1.view_access()            # accessible here
-    admin_user_1.view_access                # accessible here
+    admin_user_1.view_access()              # accessible here
 
-    my_library.return_book(student_user_1)  # accessible here
-    my_library.return_book(admin_user_1)    # accessible here
+    print(my_library.return_book(student_user_1))  # accessible here
+    print(my_library.return_book(admin_user_1))    # accessible here
+    my_library.add_books()                         # accessible here
+          
 
     print(my_book.mark_borrowed())
     print(my_book.mark_returned())
@@ -275,11 +268,9 @@ def run():
     book_available = BookUnavailableError("Beauty")
     print(book_available)
 
-    print(my_library.add_books())
-    print(my_library.register_user())
-    print(my_library.borrow_book("Power"))
-    print(my_library.return_book())
-
+   
+   
+    
     my_library_books = [
     "The Lord of the Rings: The Fellowship of the Ring",
     "A Game of Thrones",
