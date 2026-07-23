@@ -16,7 +16,7 @@ class Book:
      
 
     def mark_borrowed(self): # a method for users to borrow book 
-        if self.available == True:
+        if self.available:
             self.available = False
             return f"\nYou have successfully borrowed {self.title}"
         
@@ -26,7 +26,7 @@ class Book:
 
     def mark_returned(self): # a method for users to return borrowed book
             
-            if self.available == False:
+            if not self.available:
                 self.available = True
                 return f"{self.title} has been successfully returned"
           
@@ -224,7 +224,7 @@ class Library():
         book_to_return = input ("\nWhat book do you want to return?: ").title().strip()
 
         if book_to_return not in user._borrowed_books: #checks if borrowed nook was borrowed from the library
-            return f"This book was not borrowed"
+            return "This book was not borrowed"
         
         if book_to_return not in self.borrowed_books:
             return "Book not found in the library borrowed records"
@@ -269,8 +269,6 @@ def run():
     print(book_available)
 
    
-   
-    
     my_library_books = [
     "The Lord of the Rings: The Fellowship of the Ring",
     "A Game of Thrones",
